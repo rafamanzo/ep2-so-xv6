@@ -50,6 +50,10 @@ found:
   p->pid = nextpid++;
   release(&ptable.lock);
 
+  //Initialize structure for recording syscall
+  p->recording = 0;
+  p->recl = 0;
+  
   // Allocate kernel stack.
   if((p->kstack = kalloc()) == 0){
     p->state = UNUSED;
