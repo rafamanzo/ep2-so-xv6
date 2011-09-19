@@ -1,11 +1,12 @@
 #include "types.h"
 #include "defs.h"
 #include "param.h"
+#include "memlayout.h"
 #include "mmu.h"
+#include "x86.h"
 #include "record.h"
 #include "proc.h"
-
-#define NULL 0
+#include "spinlock.h"
 
 int startrecording(){
   if( proc->recording == 0 ){
@@ -101,8 +102,8 @@ void printrecord(struct record rec){
 
 int fetchrecords(struct record *records, int num_records){
   int i;
-   
-  if( records == NULL)
+
+  if( records == 0)
     return fetchrecordslist(proc->recl);
   else{
     for( i = 0; (i < num_records); i++)
@@ -113,46 +114,52 @@ int fetchrecords(struct record *records, int num_records){
 
 int addrecordtolist(reclist *list, struct record rec){
   reclist aux;
+  
+  if(!proc->recording)
+    return 0;
 
-  if( *list == NULL){
+  if( *list == 0){
     if( (*list = (reclist) kalloc()) == 0)
        return 0;
     (*list)->rec = rec;
-    (*list)->next = NULL;
-   }
-  for( aux = *list; aux -> next != NULL; aux =  aux -> next);
+    (*list)->next = 0;
+   }else{
+    for( aux = *list; aux -> next != 0; aux =  aux -> next);
 
-  if( (aux -> next = (reclist) kalloc()) == 0 )
-    return 0;
-  aux = aux -> next;
-  aux -> rec = rec;
-  aux -> next = NULL;  
-
+    if( (aux -> next = (reclist) kalloc()) == 0 )
+      return 0;
+    aux = aux -> next;
+    aux -> rec = rec;
+    aux -> next = 0;
+  }
+  
   return 1;
 }
 
 reclist copyrecordslist(reclist list){
   reclist new, aux, ant;
-  new = aux = ant = NULL;
+  new = aux = ant = 0;
 
+  cprintf("copyrecordslist\n");
+  
   /* Como a lista não possui cabeça tratamos o primeiro caso separadamente */
-  if(list != NULL){
+  if(list != 0){
       if( (aux = (reclist) kalloc()) == 0 )
-        return NULL;
+        return 0;
       aux -> rec = list -> rec;
-      aux -> next = NULL;
+      aux -> next = 0;
       ant = aux;
       list = list -> next;
       new = aux;
-      aux = NULL;
+      aux = 0;
   } 
-  while( list != NULL ){
+  while( list != 0 ){
       if( (aux = (reclist) kalloc()) == 0 )
-        return NULL;
+        return 0;
       aux -> rec = list -> rec;
       ant -> next = aux;
       ant = aux;
-      aux = NULL;
+      aux = 0;
       list = list -> next;
   }
   return new;
@@ -162,7 +169,9 @@ int fetchrecordslist(reclist list){
   reclist runner;
   int cnt;  
 
-  for(cnt = 0, runner = list; runner != NULL; runner = runner->next, cnt++)
+  cprintf("fetchrecordslist\n");
+
+  for(cnt = 0, runner = list; runner != 0; runner = runner->next, cnt++)
     printrecord(runner->rec);
     
   return cnt;
@@ -170,18 +179,16 @@ int fetchrecordslist(reclist list){
 
 int releaserecordslist(reclist list){
   reclist runner, next;
+
+  cprintf("releaserecords\n");
   
   runner = list; 
   
-  while(runner != NULL){
+  while(runner != 0){
     next = runner->next;
     kfree( (char *) runner );
     runner = next; 
   }
   
   return 1;
-  
-  return 1;
 }
-
-

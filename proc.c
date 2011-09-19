@@ -192,6 +192,10 @@ exit(void)
   iput(proc->cwd);
   proc->cwd = 0;
 
+  proc->recording = 0;
+  releaserecordslist(proc->recl);
+  proc->recl = 0;
+
   acquire(&ptable.lock);
 
   // Parent might be sleeping in wait().

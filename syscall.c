@@ -46,7 +46,17 @@ fetchstr(struct proc *p, uint addr, char **pp)
 int
 argint(int n, int *ip)
 {
-  return fetchint(proc, proc->tf->esp + 4 + 4*n, ip);
+  int ret;
+  struct record r;
+  
+  ret = fetchint(proc, proc->tf->esp + 4 + 4*n, ip);
+  
+  r.type = ARG_INTEGER;
+  r.value.intval = ret;
+  if(proc->recording)
+    addrecordtolist(&(proc->recl),r);
+  
+  return ret; 
 }
 
 // Fetch the nth word-sized system call argument as a pointer
@@ -56,12 +66,18 @@ int
 argptr(int n, char **pp, int size)
 {
   int i;
+  struct record r;
   
   if(argint(n, &i) < 0)
     return -1;
   if((uint)i >= proc->sz || (uint)i+size > proc->sz)
     return -1;
   *pp = (char*)i;
+  
+  r.type = ARG_POINTER;
+  r.value.ptrval = *pp;
+  addrecordtolist(&(proc->recl),r);
+  
   return 0;
 }
 
@@ -72,10 +88,23 @@ argptr(int n, char **pp, int size)
 int
 argstr(int n, char **pp)
 {
-  int addr;
+  int addr,ret;
+  struct record r;
+  
   if(argint(n, &addr) < 0)
     return -1;
-  return fetchstr(proc, addr, pp);
+  
+  ret = fetchstr(proc, addr, pp);
+  
+  r.type = ARG_STRING;
+  if(ret > MAX_STR_LEN)
+    safestrcpy(r.value.strval, *pp, MAX_STR_LEN);
+  else
+    safestrcpy(r.value.strval, *pp, ret);
+  
+  addrecordtolist(&(proc->recl), r);
+  
+  return ret;
 }
 
 extern int sys_chdir(void);
@@ -88,6 +117,7 @@ extern int sys_fstat(void);
 extern int sys_getpid(void);
 extern int sys_kill(void);
 extern int sys_link(void);
+
 extern int sys_mkdir(void);
 extern int sys_mknod(void);
 extern int sys_open(void);
