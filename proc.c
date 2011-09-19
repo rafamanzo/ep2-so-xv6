@@ -4,6 +4,7 @@
 #include "memlayout.h"
 #include "mmu.h"
 #include "x86.h"
+#include "record.h"
 #include "proc.h"
 #include "spinlock.h"
 

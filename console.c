@@ -11,6 +11,7 @@
 #include "file.h"
 #include "memlayout.h"
 #include "mmu.h"
+#include "record.h"
 #include "proc.h"
 #include "x86.h"
 
