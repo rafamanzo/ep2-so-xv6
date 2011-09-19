@@ -147,6 +147,10 @@ fork(void)
     np->state = UNUSED;
     return -1;
   }
+
+  np->recording = proc->recording;
+  np->recl = 0;
+
   np->sz = proc->sz;
   np->parent = proc;
   *np->tf = *proc->tf;
@@ -460,5 +464,3 @@ procdump(void)
     cprintf("\n");
   }
 }
-
-
