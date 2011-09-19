@@ -21,6 +21,4 @@ int startrecording();
 int stoprecording();
 int fetchrecords(struct record *records, int num_records);
 int addrecordtolist(reclist *list, struct record rec);
-reclist copyrecordslist(reclist list);
-int fetchrecordslist(reclist list);
 int releaserecordslist(reclist list);
