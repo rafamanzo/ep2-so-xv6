@@ -1,7 +1,7 @@
 #include "types.h"
 #include "record.h"
-#include "user.h"
 #include "fcntl.h"
+#include "user.h"
 
 int main(int argc, char *argv[]){
   int fd;
@@ -10,14 +10,17 @@ int main(int argc, char *argv[]){
   
   fd = open("./tr.out", O_CREATE);
   close(fd);
-
+	startrecording();
   fd = open("./tr.out", O_RDWR);
-
-  printf(fd, "Oi\n");
-
+  printf(fd, "Incio dos testes\n");
   close(fd);
+  sleep(20);
+	uptime();
+	printf(fd,"Gravações: %d\n",fetchrecords(0,0));
 
-  exec("cat tr.ou", &out);
+
+  exec("cat tr.out", &out);
 
   return 0;
 }
+
