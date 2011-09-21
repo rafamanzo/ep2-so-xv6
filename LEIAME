@@ -1,0 +1,4 @@
+Giancarlo Rigo
+Rafael Reggiani Manzo
+
+Para executar faça "make qemu" e dentro do xv6, execute "testrecording". Para ver a saída faça "cat tr.out".

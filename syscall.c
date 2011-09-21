@@ -164,8 +164,14 @@ void
 syscall(void)
 {
   int num;
+  struct record syscall, ret;
 
   num = proc->tf->eax;
+
+  syscall.type = SYSCALL_NO;
+  syscall.value.intval = num;
+  addrecordtolist(&(proc->recl), syscall);
+
   if(num >= 0 && num < SYS_open && syscalls[num]) {
     proc->tf->eax = syscalls[num]();
   } else if (num >= SYS_open && num < NELEM(syscalls) && syscalls[num]) {
@@ -175,4 +181,8 @@ syscall(void)
             proc->pid, proc->name, num);
     proc->tf->eax = -1;
   }
+
+  ret.type = RET_VALUE;
+  ret.value.intval = proc->tf->eax;
+  addrecordtolist(&(proc->recl), ret);
 }
